@@ -6,6 +6,7 @@ import { LoginRoute } from '@/routes/LoginRoute'
 import { TripsListPage } from '@/pages/TripsListPage'
 import { TripHomePage } from '@/pages/trip/TripHomePage'
 import { ItineraryPage } from '@/pages/trip/ItineraryPage'
+import { PlacesPage } from '@/pages/trip/PlacesPage'
 import { ComingSoon } from '@/pages/trip/ComingSoon'
 
 export default function App() {
@@ -22,7 +23,7 @@ export default function App() {
         <Route path="/trips/:tripId" element={<TripLayout />}>
           <Route index element={<TripHomePage />} />
           <Route path="itinerary" element={<ItineraryPage />} />
-          <Route path="places" element={<ComingSoon title="장소" phase="3. 장소" />} />
+          <Route path="places" element={<PlacesPage />} />
           <Route path="polls" element={<ComingSoon title="투표" phase="5. 협업" />} />
           <Route path="expenses" element={<ComingSoon title="경비·정산" phase="4. 경비" />} />
           <Route path="activity" element={<ComingSoon title="활동" phase="5. 협업" />} />
