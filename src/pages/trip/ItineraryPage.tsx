@@ -8,8 +8,15 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
+import { isApiError } from '@/lib/api/client'
 import { useTrip } from '@/features/trips/api'
-import { useItinerary } from '@/features/itinerary/api'
+import {
+  useCreateItineraryItem,
+  useDeleteItineraryItem,
+  useItinerary,
+  useReorderItinerary,
+  useUpdateItineraryItem,
+} from '@/features/itinerary/api'
 import { useSavedPlaces } from '@/features/places/api'
 import { DayTimeline } from '@/features/itinerary/DayTimeline'
 import {
@@ -20,17 +27,20 @@ import { getTripDays, sortByOrder } from '@/features/itinerary/display'
 import type { ItineraryItem } from '@/types'
 
 /**
- * 일정 플래너 (S-04) — 마크업 + 기능 단계.
- * 추가/수정/삭제/드래그 정렬을 로컬 상태로 처리한다.
- * API 연결 단계에서 로컬 상태 변경을 mutation(낙관적 업데이트 + version)으로 대체한다.
+ * 일정 플래너 (S-04) — API 연결 단계.
+ * 편집은 TanStack Query mutation(낙관적 업데이트 + version 기반 낙관적 잠금)으로 처리한다.
  */
 export function ItineraryPage() {
   const { tripId } = useParams<{ tripId: string }>()
   const { data: trip } = useTrip(tripId)
-  const { data: fetched, isLoading } = useItinerary(tripId)
+  const { data: items = [], isLoading } = useItinerary(tripId)
   const { data: places = [] } = useSavedPlaces(tripId)
 
-  const [items, setItems] = useState<ItineraryItem[]>([])
+  const createItem = useCreateItineraryItem(tripId!)
+  const updateItem = useUpdateItineraryItem(tripId!)
+  const deleteItem = useDeleteItineraryItem(tripId!)
+  const reorder = useReorderItinerary(tripId!)
+
   const [selectedDate, setSelectedDate] = useState<string>('')
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [editing, setEditing] = useState<ItineraryItem | null>(null)
@@ -40,12 +50,6 @@ export function ItineraryPage() {
     [trip],
   )
 
-  // 조회 결과를 로컬 작업본으로 시드
-  useEffect(() => {
-    if (fetched) setItems(fetched)
-  }, [fetched])
-
-  // 기본 선택 날짜 = 첫째 날
   useEffect(() => {
     if (!selectedDate && days.length > 0) setSelectedDate(days[0])
   }, [days, selectedDate])
@@ -54,30 +58,6 @@ export function ItineraryPage() {
     () => sortByOrder(items.filter((i) => i.date === selectedDate)),
     [items, selectedDate],
   )
-
-  function nextSortOrder(date: string): number {
-    const inDay = items.filter((i) => i.date === date)
-    return inDay.length ? Math.max(...inDay.map((i) => i.sortOrder)) + 1 : 1
-  }
-
-  function buildItem(values: ItineraryFormValues, base?: ItineraryItem): ItineraryItem {
-    const place = values.placeId ? places.find((p) => p.id === values.placeId) : undefined
-    return {
-      id: base?.id ?? crypto.randomUUID(),
-      tripId: tripId!,
-      placeId: values.placeId || undefined,
-      place: place
-        ? { id: place.id, name: place.name, category: place.category }
-        : undefined,
-      date: values.date,
-      startsAt: values.startsAt || undefined,
-      endsAt: values.endsAt || undefined,
-      sortOrder: base?.sortOrder ?? nextSortOrder(values.date),
-      transport: values.transport,
-      note: values.note || undefined,
-      version: base?.version ?? 1,
-    }
-  }
 
   function handleAdd() {
     setEditing(null)
@@ -89,32 +69,62 @@ export function ItineraryPage() {
     setDrawerOpen(true)
   }
 
-  function handleSave(values: ItineraryFormValues) {
-    if (editing) {
-      const updated = buildItem(values, editing)
-      setItems((prev) => prev.map((i) => (i.id === editing.id ? updated : i)))
-      toast.success('일정을 수정했어요.')
-    } else {
-      const created = buildItem(values)
-      setItems((prev) => [...prev, created])
-      setSelectedDate(values.date)
-      toast.success('일정을 추가했어요.')
+  async function handleSave(values: ItineraryFormValues) {
+    try {
+      if (editing) {
+        await updateItem.mutateAsync({
+          id: editing.id,
+          version: editing.version,
+          date: values.date,
+          startsAt: values.startsAt || undefined,
+          endsAt: values.endsAt || undefined,
+          placeId: values.placeId, // '' 이면 장소 해제
+          note: values.note || undefined,
+          transport: values.transport,
+        })
+        toast.success('일정을 수정했어요.')
+      } else {
+        await createItem.mutateAsync({
+          date: values.date,
+          startsAt: values.startsAt || undefined,
+          endsAt: values.endsAt || undefined,
+          placeId: values.placeId || undefined,
+          note: values.note || undefined,
+          transport: values.transport,
+        })
+        setSelectedDate(values.date)
+        toast.success('일정을 추가했어요.')
+      }
+    } catch (err) {
+      if (isApiError(err) && err.response?.status === 409) {
+        toast.error('다른 사람이 먼저 수정했어요. 최신 내용으로 갱신합니다.')
+      } else {
+        toast.error('저장에 실패했어요. 다시 시도해 주세요.')
+      }
     }
   }
 
-  function handleDelete(item: ItineraryItem) {
-    setItems((prev) => prev.filter((i) => i.id !== item.id))
-    toast.success('일정을 삭제했어요.')
+  async function handleDelete(item: ItineraryItem) {
+    try {
+      await deleteItem.mutateAsync(item.id)
+      toast.success('일정을 삭제했어요.')
+    } catch {
+      toast.error('삭제에 실패했어요.')
+    }
   }
 
-  // 같은 날짜 안에서 순서를 재배열하고 sortOrder 를 다시 매긴다.
-  function handleReorder(orderedIds: string[]) {
-    setItems((prev) => {
-      const orderMap = new Map(orderedIds.map((id, idx) => [id, idx + 1]))
-      return prev.map((i) =>
-        orderMap.has(i.id) ? { ...i, sortOrder: orderMap.get(i.id)! } : i,
-      )
-    })
+  // 같은 날짜 안에서 순서를 재배열해 서버에 일괄 반영한다.
+  async function handleReorder(orderedIds: string[]) {
+    const updates = orderedIds.map((id, idx) => ({
+      id,
+      date: selectedDate,
+      sortOrder: idx + 1,
+    }))
+    try {
+      await reorder.mutateAsync(updates)
+    } catch {
+      toast.error('순서 변경에 실패했어요.')
+    }
   }
 
   return (
