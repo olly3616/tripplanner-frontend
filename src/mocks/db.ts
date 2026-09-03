@@ -1,0 +1,228 @@
+import type {
+  ActivityLog,
+  Expense,
+  ItineraryItem,
+  Poll,
+  SavedPlace,
+  Trip,
+  TripMember,
+  User,
+} from '@/types'
+
+/**
+ * 인메모리 목 데이터베이스.
+ * 포트폴리오 시연 시나리오(제주 여행, 친구 3~4명) 기반 시드.
+ * 실제 백엔드 연동 시 이 계층만 걷어내면 된다.
+ */
+
+export const users: User[] = [
+  {
+    id: 'u1',
+    email: 'olly3616@pilsa.co.kr',
+    name: '김지민',
+    defaultCurrency: 'KRW',
+    timezone: 'Asia/Seoul',
+  },
+  {
+    id: 'u2',
+    email: 'minji@example.com',
+    name: '이민지',
+    defaultCurrency: 'KRW',
+    timezone: 'Asia/Seoul',
+  },
+  {
+    id: 'u3',
+    email: 'jun@example.com',
+    name: '박준',
+    defaultCurrency: 'KRW',
+    timezone: 'Asia/Seoul',
+  },
+  {
+    id: 'u4',
+    email: 'sora@example.com',
+    name: '최소라',
+    defaultCurrency: 'KRW',
+    timezone: 'Asia/Seoul',
+  },
+]
+
+/** 현재 로그인 사용자(목 인증) */
+export const CURRENT_USER_ID = 'u1'
+
+export const trips: Trip[] = [
+  {
+    id: 't1',
+    ownerId: 'u1',
+    title: '제주 여름 여행',
+    destination: '제주특별자치도',
+    startsOn: '2026-08-14',
+    endsOn: '2026-08-17',
+    baseCurrency: 'KRW',
+    timezone: 'Asia/Seoul',
+    status: 'ongoing',
+    memberCount: 4,
+    itineraryCount: 12,
+    expenseCount: 8,
+  },
+  {
+    id: 't2',
+    ownerId: 'u1',
+    title: '도쿄 주말 여행',
+    destination: '도쿄',
+    startsOn: '2026-10-03',
+    endsOn: '2026-10-05',
+    baseCurrency: 'KRW',
+    timezone: 'Asia/Tokyo',
+    status: 'upcoming',
+    memberCount: 2,
+    itineraryCount: 0,
+    expenseCount: 0,
+  },
+]
+
+export const tripMembers: TripMember[] = [
+  { tripId: 't1', userId: 'u1', role: 'owner', joinedAt: '2026-07-20T00:00:00Z', user: users[0] },
+  { tripId: 't1', userId: 'u2', role: 'editor', joinedAt: '2026-07-21T00:00:00Z', user: users[1] },
+  { tripId: 't1', userId: 'u3', role: 'editor', joinedAt: '2026-07-21T00:00:00Z', user: users[2] },
+  { tripId: 't1', userId: 'u4', role: 'viewer', joinedAt: '2026-07-22T00:00:00Z', user: users[3] },
+  { tripId: 't2', userId: 'u1', role: 'owner', joinedAt: '2026-09-01T00:00:00Z', user: users[0] },
+  { tripId: 't2', userId: 'u2', role: 'editor', joinedAt: '2026-09-01T00:00:00Z', user: users[1] },
+]
+
+export const savedPlaces: SavedPlace[] = [
+  {
+    id: 'p1',
+    tripId: 't1',
+    name: '성산일출봉',
+    address: '제주 서귀포시 성산읍 성산리 1',
+    latitude: 33.458,
+    longitude: 126.9425,
+    category: '자연',
+    status: 'confirmed',
+    tags: ['일출', '트레킹'],
+    note: '이른 아침 방문 추천',
+  },
+  {
+    id: 'p2',
+    tripId: 't1',
+    name: '카페 A',
+    address: '제주 서귀포시 남원읍',
+    latitude: 33.2782,
+    longitude: 126.72,
+    category: '카페',
+    status: 'considering',
+    tags: ['오션뷰'],
+  },
+  {
+    id: 'p3',
+    tripId: 't1',
+    name: '흑돼지 식당 A',
+    address: '제주 제주시 노형동',
+    latitude: 33.4855,
+    longitude: 126.4772,
+    category: '식당',
+    status: 'want',
+    tags: ['저녁', '흑돼지'],
+  },
+]
+
+export const itineraryItems: ItineraryItem[] = [
+  {
+    id: 'i1',
+    tripId: 't1',
+    placeId: 'p1',
+    place: { id: 'p1', name: '성산일출봉', category: '자연' },
+    date: '2026-08-14',
+    startsAt: '10:00',
+    endsAt: '11:30',
+    sortOrder: 1,
+    transport: 'car',
+    note: '렌터카 90분',
+    version: 1,
+  },
+  {
+    id: 'i2',
+    tripId: 't1',
+    placeId: 'p3',
+    place: { id: 'p3', name: '흑돼지 식당 A', category: '식당' },
+    date: '2026-08-14',
+    startsAt: '14:00',
+    sortOrder: 2,
+    transport: 'walk',
+    note: '도보 15분',
+    version: 1,
+  },
+]
+
+export const polls: Poll[] = [
+  {
+    id: 'poll1',
+    tripId: 't1',
+    title: '첫날 저녁 식당은 어디로 할까요?',
+    options: [
+      { id: 'o1', label: '흑돼지 식당 A', voteCount: 2 },
+      { id: 'o2', label: '해산물 식당 B', voteCount: 1 },
+    ],
+    multiple: false,
+    anonymous: false,
+    closesAt: '2026-08-12T18:00:00Z',
+    closed: false,
+    myVotes: [],
+  },
+]
+
+export const expenses: Expense[] = [
+  {
+    id: 'e1',
+    tripId: 't1',
+    payerId: 'u2',
+    title: '숙소비',
+    amountMinor: 240000,
+    currency: 'KRW',
+    exchangeRate: 1,
+    baseAmountMinor: 240000,
+    category: 'lodging',
+    splitMethod: 'equal',
+    splits: [
+      { userId: 'u1', amountMinor: 60000 },
+      { userId: 'u2', amountMinor: 60000 },
+      { userId: 'u3', amountMinor: 60000 },
+      { userId: 'u4', amountMinor: 60000 },
+    ],
+    spentAt: '2026-08-14T09:00:00Z',
+    note: '4인 2박',
+  },
+  {
+    id: 'e2',
+    tripId: 't1',
+    payerId: 'u3',
+    title: '점심 식사',
+    amountMinor: 480000, // ¥4,800 (JPY 최소단위=원 단위, 소수 0)
+    currency: 'JPY',
+    exchangeRate: 9.1,
+    baseAmountMinor: 43680,
+    category: 'food',
+    splitMethod: 'equal',
+    splits: [
+      { userId: 'u1', amountMinor: 10920 },
+      { userId: 'u2', amountMinor: 10920 },
+      { userId: 'u3', amountMinor: 10920 },
+      { userId: 'u4', amountMinor: 10920 },
+    ],
+    spentAt: '2026-08-14T12:30:00Z',
+  },
+]
+
+export const activityLogs: ActivityLog[] = [
+  {
+    id: 'a1',
+    tripId: 't1',
+    actorId: 'u2',
+    actor: { id: 'u2', name: '이민지' },
+    action: 'expense.created',
+    entityType: 'expense',
+    entityId: 'e1',
+    metadata: { title: '숙소비', amount: '₩240,000' },
+    createdAt: '2026-08-14T09:00:00Z',
+  },
+]
