@@ -10,7 +10,7 @@ import {
   trips,
   users,
 } from './db'
-import type { Trip } from '@/types'
+import type { ItineraryItem, Trip } from '@/types'
 
 const BASE = import.meta.env.VITE_API_BASE_URL || '/api'
 const url = (path: string) => `${BASE}${path}`
@@ -109,6 +109,99 @@ export const handlers = [
   http.get(url('/trips/:tripId/itinerary'), ({ request, params }) => {
     if (!isAuthed(request)) return unauthorized()
     return HttpResponse.json(itineraryItems.filter((i) => i.tripId === params.tripId))
+  }),
+
+  http.post(url('/trips/:tripId/itinerary'), async ({ request, params }) => {
+    if (!isAuthed(request)) return unauthorized()
+    const body = (await request.json()) as {
+      date: string
+      startsAt?: string
+      endsAt?: string
+      placeId?: string
+      note?: string
+      transport?: ItineraryItem['transport']
+    }
+    const place = body.placeId
+      ? savedPlaces.find((p) => p.id === body.placeId)
+      : undefined
+    const sameDay = itineraryItems.filter(
+      (i) => i.tripId === params.tripId && i.date === body.date,
+    )
+    const item: ItineraryItem = {
+      id: crypto.randomUUID(),
+      tripId: String(params.tripId),
+      placeId: body.placeId || undefined,
+      place: place ? { id: place.id, name: place.name, category: place.category } : undefined,
+      date: body.date,
+      startsAt: body.startsAt || undefined,
+      endsAt: body.endsAt || undefined,
+      sortOrder: sameDay.length
+        ? Math.max(...sameDay.map((i) => i.sortOrder)) + 1
+        : 1,
+      transport: body.transport ?? 'none',
+      note: body.note || undefined,
+      version: 1,
+    }
+    itineraryItems.push(item)
+    return HttpResponse.json(item, { status: 201 })
+  }),
+
+  http.patch(url('/itinerary/:itemId'), async ({ request, params }) => {
+    if (!isAuthed(request)) return unauthorized()
+    const idx = itineraryItems.findIndex((i) => i.id === params.itemId)
+    if (idx === -1)
+      return HttpResponse.json({ message: '일정을 찾을 수 없습니다.' }, { status: 404 })
+    const current = itineraryItems[idx]
+    const body = (await request.json()) as Partial<ItineraryItem> & { version?: number }
+
+    // 낙관적 잠금: 클라이언트 version 이 최신과 다르면 409 + 최신 데이터
+    if (typeof body.version === 'number' && body.version !== current.version) {
+      return HttpResponse.json(
+        { message: '다른 사람이 먼저 수정했습니다.', latest: current },
+        { status: 409 },
+      )
+    }
+
+    const place = body.placeId
+      ? savedPlaces.find((p) => p.id === body.placeId)
+      : body.placeId === ''
+        ? undefined
+        : current.place
+    const updated: ItineraryItem = {
+      ...current,
+      ...body,
+      placeId: body.placeId === '' ? undefined : (body.placeId ?? current.placeId),
+      place: body.placeId !== undefined
+        ? place
+          ? { id: place.id, name: place.name, category: place.category }
+          : undefined
+        : current.place,
+      version: current.version + 1,
+    }
+    itineraryItems[idx] = updated
+    return HttpResponse.json(updated)
+  }),
+
+  http.delete(url('/itinerary/:itemId'), ({ request, params }) => {
+    if (!isAuthed(request)) return unauthorized()
+    const idx = itineraryItems.findIndex((i) => i.id === params.itemId)
+    if (idx !== -1) itineraryItems.splice(idx, 1)
+    return new HttpResponse(null, { status: 204 })
+  }),
+
+  http.post(url('/itinerary/reorder'), async ({ request }) => {
+    if (!isAuthed(request)) return unauthorized()
+    const body = (await request.json()) as {
+      updates: { id: string; date: string; sortOrder: number }[]
+    }
+    for (const u of body.updates) {
+      const target = itineraryItems.find((i) => i.id === u.id)
+      if (target) {
+        target.date = u.date
+        target.sortOrder = u.sortOrder
+      }
+    }
+    return new HttpResponse(null, { status: 204 })
   }),
 
   // --- 투표 ---
