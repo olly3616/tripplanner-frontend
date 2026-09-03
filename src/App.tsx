@@ -9,6 +9,7 @@ import { ItineraryPage } from '@/pages/trip/ItineraryPage'
 import { PlacesPage } from '@/pages/trip/PlacesPage'
 import { ExpensesPage } from '@/pages/trip/ExpensesPage'
 import { MembersPage } from '@/pages/trip/MembersPage'
+import { PollsPage } from '@/pages/trip/PollsPage'
 import { ComingSoon } from '@/pages/trip/ComingSoon'
 
 export default function App() {
@@ -26,7 +27,7 @@ export default function App() {
           <Route index element={<TripHomePage />} />
           <Route path="itinerary" element={<ItineraryPage />} />
           <Route path="places" element={<PlacesPage />} />
-          <Route path="polls" element={<ComingSoon title="투표" phase="5. 협업" />} />
+          <Route path="polls" element={<PollsPage />} />
           <Route path="expenses" element={<ExpensesPage />} />
           <Route path="activity" element={<ComingSoon title="활동" phase="5. 협업" />} />
           <Route path="members" element={<MembersPage />} />

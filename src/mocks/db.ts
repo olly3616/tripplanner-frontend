@@ -185,12 +185,27 @@ export const polls: Poll[] = [
     options: [
       { id: 'o1', label: '흑돼지 식당 A', voteCount: 2 },
       { id: 'o2', label: '해산물 식당 B', voteCount: 1 },
+      { id: 'o3', label: '고기국수 골목', voteCount: 0 },
     ],
-    multiple: false,
+    multiple: true,
     anonymous: false,
-    closesAt: '2026-08-12T18:00:00Z',
+    closesAt: '2026-09-20T09:00:00Z',
     closed: false,
     myVotes: [],
+  },
+  {
+    id: 'poll2',
+    tripId: 't1',
+    title: '둘째 날 오전 활동은?',
+    options: [
+      { id: 'o4', label: '카약 체험', voteCount: 3 },
+      { id: 'o5', label: '카페 투어', voteCount: 1 },
+    ],
+    multiple: false,
+    anonymous: true,
+    closesAt: '2026-08-11T09:00:00Z',
+    closed: true,
+    myVotes: ['o4'],
   },
 ]
 
