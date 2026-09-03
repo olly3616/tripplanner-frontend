@@ -8,6 +8,7 @@ import { TripHomePage } from '@/pages/trip/TripHomePage'
 import { ItineraryPage } from '@/pages/trip/ItineraryPage'
 import { PlacesPage } from '@/pages/trip/PlacesPage'
 import { ExpensesPage } from '@/pages/trip/ExpensesPage'
+import { MembersPage } from '@/pages/trip/MembersPage'
 import { ComingSoon } from '@/pages/trip/ComingSoon'
 
 export default function App() {
@@ -28,7 +29,7 @@ export default function App() {
           <Route path="polls" element={<ComingSoon title="투표" phase="5. 협업" />} />
           <Route path="expenses" element={<ExpensesPage />} />
           <Route path="activity" element={<ComingSoon title="활동" phase="5. 협업" />} />
-          <Route path="members" element={<ComingSoon title="멤버·설정" phase="1. 여행·멤버" />} />
+          <Route path="members" element={<MembersPage />} />
         </Route>
       </Route>
 
