@@ -124,6 +124,29 @@ export const savedPlaces: SavedPlace[] = [
     status: 'want',
     tags: ['저녁', '흑돼지'],
   },
+  {
+    id: 'p4',
+    tripId: 't1',
+    name: '오설록 티 뮤지엄',
+    address: '제주 서귀포시 안덕면',
+    latitude: 33.3057,
+    longitude: 126.2896,
+    category: '관광',
+    status: 'considering',
+    tags: ['차', '실내'],
+    note: '비 오는 날 대안',
+  },
+  {
+    id: 'p5',
+    tripId: 't1',
+    name: '협재 해수욕장',
+    address: '제주 제주시 한림읍',
+    latitude: 33.3941,
+    longitude: 126.2396,
+    category: '자연',
+    status: 'confirmed',
+    tags: ['해변', '노을'],
+  },
 ]
 
 export const itineraryItems: ItineraryItem[] = [
