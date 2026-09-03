@@ -10,7 +10,7 @@ import { PlacesPage } from '@/pages/trip/PlacesPage'
 import { ExpensesPage } from '@/pages/trip/ExpensesPage'
 import { MembersPage } from '@/pages/trip/MembersPage'
 import { PollsPage } from '@/pages/trip/PollsPage'
-import { ComingSoon } from '@/pages/trip/ComingSoon'
+import { ActivityPage } from '@/pages/trip/ActivityPage'
 
 export default function App() {
   return (
@@ -29,7 +29,7 @@ export default function App() {
           <Route path="places" element={<PlacesPage />} />
           <Route path="polls" element={<PollsPage />} />
           <Route path="expenses" element={<ExpensesPage />} />
-          <Route path="activity" element={<ComingSoon title="활동" phase="5. 협업" />} />
+          <Route path="activity" element={<ActivityPage />} />
           <Route path="members" element={<MembersPage />} />
         </Route>
       </Route>
