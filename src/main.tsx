@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import App from './App'
 import { SessionBootstrap } from '@/app/SessionBootstrap'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { queryClient } from '@/lib/api/queryClient'
 import './index.css'
 
@@ -17,14 +18,16 @@ async function bootstrap() {
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <SessionBootstrap>
-            <App />
-          </SessionBootstrap>
-        </BrowserRouter>
-        <Toaster position="top-center" richColors closeButton />
-      </QueryClientProvider>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <SessionBootstrap>
+              <App />
+            </SessionBootstrap>
+          </BrowserRouter>
+          <Toaster position="top-center" richColors closeButton />
+        </QueryClientProvider>
+      </ErrorBoundary>
     </StrictMode>,
   )
 }

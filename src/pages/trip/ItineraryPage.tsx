@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ui/error-state'
 import { cn } from '@/lib/utils'
 import { isApiError } from '@/lib/api/client'
 import { useTrip } from '@/features/trips/api'
@@ -33,7 +34,7 @@ import type { ItineraryItem } from '@/types'
 export function ItineraryPage() {
   const { tripId } = useParams<{ tripId: string }>()
   const { data: trip } = useTrip(tripId)
-  const { data: items = [], isLoading } = useItinerary(tripId)
+  const { data: items = [], isLoading, isError, refetch } = useItinerary(tripId)
   const { data: places = [] } = useSavedPlaces(tripId)
 
   const createItem = useCreateItineraryItem(tripId!)
@@ -173,7 +174,9 @@ export function ItineraryPage() {
         </h2>
       )}
 
-      {isLoading ? (
+      {isError ? (
+        <ErrorState title="일정을 불러오지 못했어요" onRetry={() => refetch()} />
+      ) : isLoading ? (
         <div className="grid gap-2">
           <Skeleton className="h-16" />
           <Skeleton className="h-16" />

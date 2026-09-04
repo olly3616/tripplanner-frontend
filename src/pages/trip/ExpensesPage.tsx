@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/ui/empty-state'
+import { ErrorState } from '@/components/ui/error-state'
 import { cn, formatMoney } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth'
 import { useTrip, useTripMembers } from '@/features/trips/api'
@@ -34,7 +35,7 @@ export function ExpensesPage() {
   const currentUserId = useAuthStore((s) => s.user?.id ?? '')
   const { data: trip } = useTrip(tripId)
   const { data: members = [] } = useTripMembers(tripId)
-  const { data: fetched, isLoading } = useExpenses(tripId)
+  const { data: fetched, isLoading, isError, refetch } = useExpenses(tripId)
 
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [category, setCategory] = useState<ExpenseCategory | 'all'>('all')
@@ -148,7 +149,9 @@ export function ExpensesPage() {
             </Select>
           </div>
 
-          {isLoading ? (
+          {isError ? (
+            <ErrorState title="경비를 불러오지 못했어요" onRetry={() => refetch()} />
+          ) : isLoading ? (
             <div className="grid gap-2">
               <Skeleton className="h-16" />
               <Skeleton className="h-16" />

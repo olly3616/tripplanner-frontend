@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/ui/empty-state'
+import { ErrorState } from '@/components/ui/error-state'
 import { cn } from '@/lib/utils'
 import { useTrips } from '@/features/trips/api'
 import { CreateTripDialog } from '@/features/trips/CreateTripDialog'
@@ -24,7 +25,7 @@ const FILTERS: { key: TripStatus | 'all'; label: string }[] = [
 ]
 
 export function TripsListPage() {
-  const { data: trips, isLoading } = useTrips()
+  const { data: trips, isLoading, isError, refetch } = useTrips()
   const [filter, setFilter] = useState<TripStatus | 'all'>('all')
   const [createOpen, setCreateOpen] = useState(false)
   const navigate = useNavigate()
@@ -61,7 +62,9 @@ export function TripsListPage() {
         ))}
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <ErrorState title="여행 목록을 불러오지 못했어요" onRetry={() => refetch()} />
+      ) : isLoading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <Skeleton key={i} className="h-40" />

@@ -9,6 +9,7 @@ import { Avatar } from '@/components/ui/avatar'
 import { Select } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ui/error-state'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { useAuthStore } from '@/stores/auth'
 import { useTrip, useTripMembers } from '@/features/trips/api'
@@ -32,7 +33,7 @@ export function MembersPage() {
   const navigate = useNavigate()
   const currentUserId = useAuthStore((s) => s.user?.id ?? '')
   const { data: trip } = useTrip(tripId)
-  const { data: fetched, isLoading } = useTripMembers(tripId)
+  const { data: fetched, isLoading, isError, refetch } = useTripMembers(tripId)
 
   const [members, setMembers] = useState<TripMember[]>([])
   const [invites, setInvites] = useState<PendingInvite[]>([])
@@ -82,7 +83,9 @@ export function MembersPage() {
               <CardTitle>멤버 {members.length}명</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-2">
-              {isLoading ? (
+              {isError ? (
+                <ErrorState title="멤버를 불러오지 못했어요" onRetry={() => refetch()} />
+              ) : isLoading ? (
                 <>
                   <Skeleton className="h-14" />
                   <Skeleton className="h-14" />

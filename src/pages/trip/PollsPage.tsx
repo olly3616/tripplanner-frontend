@@ -6,6 +6,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/ui/empty-state'
+import { ErrorState } from '@/components/ui/error-state'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/stores/auth'
 import { useTripMembers } from '@/features/trips/api'
@@ -27,7 +28,7 @@ export function PollsPage() {
   const { tripId } = useParams<{ tripId: string }>()
   const currentUserId = useAuthStore((s) => s.user?.id ?? '')
   const { data: members = [] } = useTripMembers(tripId)
-  const { data: fetched, isLoading } = usePolls(tripId)
+  const { data: fetched, isLoading, isError, refetch } = usePolls(tripId)
 
   const [polls, setPolls] = useState<Poll[]>([])
   const [filter, setFilter] = useState<Filter>('open')
@@ -116,7 +117,9 @@ export function PollsPage() {
         ))}
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <ErrorState title="투표를 불러오지 못했어요" onRetry={() => refetch()} />
+      ) : isLoading ? (
         <div className="grid gap-4 lg:grid-cols-2">
           <Skeleton className="h-48" />
           <Skeleton className="h-48" />
