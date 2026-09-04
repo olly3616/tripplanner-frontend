@@ -5,6 +5,7 @@ import { Sidebar } from './Sidebar'
 import { MobileTabs } from './MobileTabs'
 import { MobileMoreDrawer } from './MobileMoreDrawer'
 import { PageFallback } from './PageFallback'
+import { SkipLink } from './SkipLink'
 import { useTrip, useTrips } from '@/features/trips/api'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ui/error-state'
@@ -18,6 +19,7 @@ export function TripLayout() {
 
   return (
     <div className="min-h-dvh bg-bg">
+      <SkipLink />
       <Topbar
         trip={trip}
         trips={trips}
@@ -25,7 +27,11 @@ export function TripLayout() {
       />
       <div className="flex">
         {tripId && <Sidebar tripId={tripId} />}
-        <main className="min-w-0 flex-1 px-5 pb-24 pt-6 md:px-10 md:pb-10">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="min-w-0 flex-1 px-5 pb-24 pt-6 focus:outline-none md:px-10 md:pb-10"
+        >
           <div className="mx-auto w-full max-w-content">
             {isError ? (
               <ErrorState

@@ -42,7 +42,7 @@ export function SortableItineraryRow({ item, onEdit, onDelete }: SortableItinera
         {/* 드래그 핸들 — 키보드로도 조작 가능(dnd-kit KeyboardSensor) */}
         <button
           type="button"
-          className="shrink-0 cursor-grab touch-none rounded p-1 text-muted hover:bg-subtle hover:text-fg active:cursor-grabbing"
+          className="grid size-9 shrink-0 cursor-grab touch-none place-items-center rounded text-muted hover:bg-subtle hover:text-fg active:cursor-grabbing"
           aria-label={`${itemTitle(item)} 순서 변경`}
           {...attributes}
           {...listeners}
@@ -77,7 +77,7 @@ export function SortableItineraryRow({ item, onEdit, onDelete }: SortableItinera
         <DropdownMenu.Root>
           <DropdownMenu.Trigger
             aria-label="일정 메뉴"
-            className="shrink-0 rounded p-1 text-muted hover:bg-subtle hover:text-fg focus-visible:outline-none"
+            className="grid size-9 shrink-0 place-items-center rounded text-muted hover:bg-subtle hover:text-fg focus-visible:outline-none"
           >
             <MoreVertical className="size-4" />
           </DropdownMenu.Trigger>
