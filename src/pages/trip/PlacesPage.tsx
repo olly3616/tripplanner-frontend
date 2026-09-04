@@ -8,6 +8,7 @@ import { Select } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/ui/empty-state'
+import { ErrorState } from '@/components/ui/error-state'
 import { cn } from '@/lib/utils'
 import { useSavedPlaces } from '@/features/places/api'
 import { PlaceMap } from '@/features/places/PlaceMap'
@@ -29,7 +30,7 @@ import type { PlaceStatus, SavedPlace } from '@/types'
  */
 export function PlacesPage() {
   const { tripId } = useParams<{ tripId: string }>()
-  const { data: fetched, isLoading } = useSavedPlaces(tripId)
+  const { data: fetched, isLoading, isError, refetch } = useSavedPlaces(tripId)
 
   const [places, setPlaces] = useState<SavedPlace[]>([])
   const [query, setQuery] = useState('')
@@ -118,7 +119,9 @@ export function PlacesPage() {
         </Select>
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <ErrorState title="장소를 불러오지 못했어요" onRetry={() => refetch()} />
+      ) : isLoading ? (
         <div className="grid gap-4 lg:grid-cols-2">
           <div className="grid gap-2">
             <Skeleton className="h-16" />

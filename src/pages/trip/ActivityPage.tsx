@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/layout/PageHeader'
 import { Avatar } from '@/components/ui/avatar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { EmptyState } from '@/components/ui/empty-state'
+import { ErrorState } from '@/components/ui/error-state'
 import { cn } from '@/lib/utils'
 import { useActivity } from '@/features/activity/api'
 import {
@@ -23,7 +24,7 @@ import type { ActivityType } from '@/features/activity/display'
  */
 export function ActivityPage() {
   const { tripId } = useParams<{ tripId: string }>()
-  const { data: logs = [], isLoading } = useActivity(tripId)
+  const { data: logs = [], isLoading, isError, refetch } = useActivity(tripId)
   const [filter, setFilter] = useState<ActivityType | 'all'>('all')
 
   const filtered = useMemo(() => {
@@ -56,7 +57,9 @@ export function ActivityPage() {
         ))}
       </div>
 
-      {isLoading ? (
+      {isError ? (
+        <ErrorState title="활동을 불러오지 못했어요" onRetry={() => refetch()} />
+      ) : isLoading ? (
         <div className="grid gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-14" />
