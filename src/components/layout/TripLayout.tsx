@@ -1,8 +1,10 @@
+import { Suspense } from 'react'
 import { Outlet, useNavigate, useParams } from 'react-router-dom'
 import { Topbar } from './Topbar'
 import { Sidebar } from './Sidebar'
 import { MobileTabs } from './MobileTabs'
 import { MobileMoreDrawer } from './MobileMoreDrawer'
+import { PageFallback } from './PageFallback'
 import { useTrip, useTrips } from '@/features/trips/api'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -30,7 +32,9 @@ export function TripLayout() {
                 <Skeleton className="h-40 w-full" />
               </div>
             ) : (
-              <Outlet />
+              <Suspense fallback={<PageFallback />}>
+                <Outlet />
+              </Suspense>
             )}
           </div>
         </main>

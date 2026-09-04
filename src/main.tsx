@@ -6,11 +6,14 @@ import { Toaster } from 'sonner'
 import App from './App'
 import { SessionBootstrap } from '@/app/SessionBootstrap'
 import { queryClient } from '@/lib/api/queryClient'
-import { enableMocking } from '@/mocks/browser'
 import './index.css'
 
 async function bootstrap() {
-  await enableMocking()
+  // 목 모드일 때만 MSW 계층을 동적 로딩한다(별도 청크, 실서버 연동 시 번들에서 제외).
+  if (import.meta.env.VITE_USE_MOCKS === 'true') {
+    const { enableMocking } = await import('@/mocks/browser')
+    await enableMocking()
+  }
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
