@@ -185,7 +185,7 @@ export function PlacesPage() {
                           type="button"
                           onClick={() => openDetail(place.id)}
                           aria-label={`${place.name} 상세`}
-                          className="shrink-0 rounded p-1 text-muted hover:bg-subtle hover:text-fg focus-visible:outline-none"
+                          className="grid size-9 shrink-0 place-items-center rounded text-muted hover:bg-subtle hover:text-fg focus-visible:outline-none"
                         >
                           <ChevronRight className="size-4" />
                         </button>
