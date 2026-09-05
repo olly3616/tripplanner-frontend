@@ -1,5 +1,6 @@
 import type {
   ActivityLog,
+  AppNotification,
   Expense,
   ItineraryItem,
   Poll,
@@ -248,6 +249,39 @@ export const expenses: Expense[] = [
       { userId: 'u4', amountMinor: 10920 },
     ],
     spentAt: '2026-08-14T12:30:00Z',
+  },
+]
+
+export const notifications: AppNotification[] = [
+  {
+    id: 'n1',
+    userId: CURRENT_USER_ID,
+    type: 'expense_added',
+    payload: { tripId: 't1', title: '숙소비', actor: '이민지' },
+    createdAt: '2026-08-14T09:00:00Z',
+  },
+  {
+    id: 'n2',
+    userId: CURRENT_USER_ID,
+    type: 'poll_created',
+    payload: { tripId: 't1', title: '첫날 저녁 식당은 어디로 할까요?', actor: '김지민' },
+    createdAt: '2026-08-12T10:05:00Z',
+  },
+  {
+    id: 'n3',
+    userId: CURRENT_USER_ID,
+    type: 'itinerary_changed',
+    payload: { tripId: 't1', title: '성산일출봉', actor: '이민지' },
+    readAt: '2026-08-13T22:00:00Z',
+    createdAt: '2026-08-13T21:02:00Z',
+  },
+  {
+    id: 'n4',
+    userId: CURRENT_USER_ID,
+    type: 'invite',
+    payload: { tripId: 't1', actor: '김지민' },
+    readAt: '2026-07-22T09:00:00Z',
+    createdAt: '2026-07-22T08:00:00Z',
   },
 ]
 

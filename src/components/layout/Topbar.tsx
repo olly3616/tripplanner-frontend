@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Bell, ChevronDown, LogOut } from 'lucide-react'
+import { ChevronDown, LogOut } from 'lucide-react'
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu'
 import { Avatar } from '@/components/ui/avatar'
+import { NotificationBell } from '@/features/notifications/NotificationBell'
 import { useAuthStore } from '@/stores/auth'
 import type { Trip } from '@/types'
 import { cn } from '@/lib/utils'
@@ -75,15 +76,7 @@ export function Topbar({ trip, trips = [], onSwitchTrip }: TopbarProps) {
       )}
 
       <div className="ml-auto flex items-center gap-2 md:gap-3">
-        <button
-          type="button"
-          aria-label="알림"
-          className="relative grid size-10 place-items-center rounded-md text-secondary hover:bg-subtle hover:text-fg"
-        >
-          <Bell className="size-5" />
-          <span className="absolute right-1.5 top-1.5 size-2 rounded-full bg-accent" />
-          <span className="sr-only">읽지 않은 알림</span>
-        </button>
+        <NotificationBell />
 
         <DropdownMenu.Root>
           <DropdownMenu.Trigger

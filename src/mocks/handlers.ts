@@ -4,6 +4,7 @@ import {
   activityLogs,
   expenses,
   itineraryItems,
+  notifications,
   polls,
   savedPlaces,
   tripMembers,
@@ -220,5 +221,24 @@ export const handlers = [
   http.get(url('/trips/:tripId/activity'), ({ request, params }) => {
     if (!isAuthed(request)) return unauthorized()
     return HttpResponse.json(activityLogs.filter((a) => a.tripId === params.tripId))
+  }),
+
+  // --- 알림 ---
+  http.get(url('/notifications'), ({ request }) => {
+    if (!isAuthed(request)) return unauthorized()
+    return HttpResponse.json(
+      notifications.filter((n) => n.userId === CURRENT_USER_ID),
+    )
+  }),
+
+  http.patch(url('/notifications'), async ({ request }) => {
+    if (!isAuthed(request)) return unauthorized()
+    const body = (await request.json().catch(() => ({}))) as { ids?: string[] }
+    const now = new Date().toISOString()
+    for (const n of notifications) {
+      if (n.userId !== CURRENT_USER_ID) continue
+      if (!body.ids || body.ids.includes(n.id)) n.readAt = n.readAt ?? now
+    }
+    return HttpResponse.json(notifications.filter((n) => n.userId === CURRENT_USER_ID))
   }),
 ]
