@@ -13,6 +13,8 @@ import { ErrorState } from '@/components/ui/error-state'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
 import { useAuthStore } from '@/stores/auth'
 import { useTrip, useTripMembers } from '@/features/trips/api'
+import { EditTripDialog } from '@/features/trips/EditTripDialog'
+import { formatTripRange } from '@/features/trips/display'
 import { InviteDialog } from '@/features/members/InviteDialog'
 import { ShareLinkCard } from '@/features/members/ShareLinkCard'
 import { assignableRoleOptions, roleLabel, roleVariant } from '@/features/members/display'
@@ -38,6 +40,7 @@ export function MembersPage() {
   const [members, setMembers] = useState<TripMember[]>([])
   const [invites, setInvites] = useState<PendingInvite[]>([])
   const [inviteOpen, setInviteOpen] = useState(false)
+  const [editTripOpen, setEditTripOpen] = useState(false)
   const [removeTarget, setRemoveTarget] = useState<TripMember | null>(null)
   const [deleteTripOpen, setDeleteTripOpen] = useState(false)
 
@@ -165,6 +168,26 @@ export function MembersPage() {
             </CardContent>
           </Card>
 
+          {/* 여행 정보 (소유자) */}
+          {isOwner && trip && (
+            <Card>
+              <CardHeader>
+                <CardTitle>여행 정보</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium">{trip.title}</p>
+                  <p className="text-xs text-muted">
+                    {formatTripRange(trip.startsOn, trip.endsOn)} · {trip.destination} · {trip.baseCurrency}
+                  </p>
+                </div>
+                <Button variant="outline" onClick={() => setEditTripOpen(true)}>
+                  수정
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+
           {/* 위험 구역 (소유자) */}
           {isOwner && (
             <Card className="border-danger/30">
@@ -194,6 +217,10 @@ export function MembersPage() {
       </div>
 
       <InviteDialog open={inviteOpen} onOpenChange={setInviteOpen} onInvite={handleInvite} />
+
+      {trip && (
+        <EditTripDialog open={editTripOpen} onOpenChange={setEditTripOpen} trip={trip} />
+      )}
 
       <ConfirmDialog
         open={!!removeTarget}
