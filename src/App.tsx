@@ -1,4 +1,4 @@
-import { lazy } from 'react'
+import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { RequireAuth } from '@/routes/RequireAuth'
 import { AppLayout } from '@/components/layout/AppLayout'
@@ -31,11 +31,17 @@ const ActivityPage = lazy(() =>
 const MembersPage = lazy(() =>
   import('@/pages/trip/MembersPage').then((m) => ({ default: m.MembersPage })),
 )
+const SharePage = lazy(() =>
+  import('@/pages/SharePage').then((m) => ({ default: m.SharePage })),
+)
 
 export default function App() {
   return (
-    <Routes>
+    <Suspense fallback={<div className="min-h-dvh bg-bg" />}>
+      <Routes>
       <Route path="/login" element={<LoginRoute />} />
+      {/* 공개 공유 페이지 — 인증 불필요 */}
+      <Route path="/s/:token" element={<SharePage />} />
 
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
@@ -54,7 +60,8 @@ export default function App() {
         </Route>
       </Route>
 
-      <Route path="*" element={<Navigate to="/trips" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/trips" replace />} />
+      </Routes>
+    </Suspense>
   )
 }

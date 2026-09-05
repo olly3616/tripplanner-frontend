@@ -241,4 +241,39 @@ export const handlers = [
     }
     return HttpResponse.json(notifications.filter((n) => n.userId === CURRENT_USER_ID))
   }),
+
+  // --- 공개 공유 페이지 (인증 불필요) ---
+  http.get(url('/share/:token'), ({ params }) => {
+    // 데모 토큰만 유효. 실제로는 token_hash 조회 + 만료/폐기 검사.
+    if (params.token !== 'demo-share-token') {
+      return HttpResponse.json({ message: '유효하지 않은 공유 링크입니다.' }, { status: 404 })
+    }
+    const trip = trips.find((t) => t.id === 't1')!
+    const tripExpenses = expenses.filter((e) => e.tripId === 't1')
+    const totalBase = tripExpenses.reduce((s, e) => s + e.baseAmountMinor, 0)
+    const byCat = new Map<string, number>()
+    for (const e of tripExpenses) byCat.set(e.category, (byCat.get(e.category) ?? 0) + e.baseAmountMinor)
+
+    return HttpResponse.json({
+      trip: {
+        title: trip.title,
+        destination: trip.destination,
+        startsOn: trip.startsOn,
+        endsOn: trip.endsOn,
+        timezone: trip.timezone,
+        baseCurrency: trip.baseCurrency,
+        memberCount: trip.memberCount,
+      },
+      itinerary: itineraryItems.filter((i) => i.tripId === 't1'),
+      places: savedPlaces.filter((p) => p.tripId === 't1'),
+      includeExpenses: true,
+      expenseSummary: {
+        baseCurrency: trip.baseCurrency,
+        totalBase,
+        byCategory: [...byCat.entries()]
+          .sort((a, b) => b[1] - a[1])
+          .map(([category, amount]) => ({ category, amount })),
+      },
+    })
+  }),
 ]
