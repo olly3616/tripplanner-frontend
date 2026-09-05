@@ -46,6 +46,30 @@ export function useTripMembers(tripId: string | undefined) {
   })
 }
 
+export interface UpdateTripInput {
+  title: string
+  destination: string
+  startsOn: string
+  endsOn: string
+  baseCurrency: string
+  timezone: string
+}
+
+/** 여행 정보 수정 */
+export function useUpdateTrip(tripId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: UpdateTripInput) => {
+      const { data } = await api.patch<Trip>(`/trips/${tripId}`, input)
+      return data
+    },
+    onSuccess: (trip) => {
+      qc.setQueryData(['trip', tripId], trip)
+      qc.invalidateQueries({ queryKey: ['trips'] })
+    },
+  })
+}
+
 /** 여행 생성 */
 export function useCreateTrip() {
   const qc = useQueryClient()

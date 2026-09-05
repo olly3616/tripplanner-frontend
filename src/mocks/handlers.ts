@@ -94,6 +94,16 @@ export const handlers = [
     return HttpResponse.json(trip)
   }),
 
+  http.patch(url('/trips/:tripId'), async ({ request, params }) => {
+    if (!isAuthed(request)) return unauthorized()
+    const idx = trips.findIndex((t) => t.id === params.tripId)
+    if (idx === -1)
+      return HttpResponse.json({ message: '여행을 찾을 수 없습니다.' }, { status: 404 })
+    const body = (await request.json()) as Partial<Trip>
+    trips[idx] = { ...trips[idx], ...body, id: trips[idx].id, ownerId: trips[idx].ownerId }
+    return HttpResponse.json(trips[idx])
+  }),
+
   // --- 멤버 ---
   http.get(url('/trips/:tripId/members'), ({ request, params }) => {
     if (!isAuthed(request)) return unauthorized()
