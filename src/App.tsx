@@ -34,6 +34,9 @@ const MembersPage = lazy(() =>
 const SharePage = lazy(() =>
   import('@/pages/SharePage').then((m) => ({ default: m.SharePage })),
 )
+const OnboardingPage = lazy(() =>
+  import('@/pages/OnboardingPage').then((m) => ({ default: m.OnboardingPage })),
+)
 
 export default function App() {
   return (
@@ -44,6 +47,9 @@ export default function App() {
       <Route path="/s/:token" element={<SharePage />} />
 
       <Route element={<RequireAuth />}>
+        {/* 온보딩 — 인증 필요, 앱 셸 없이 단독 표시 */}
+        <Route path="/onboarding" element={<OnboardingPage />} />
+
         <Route element={<AppLayout />}>
           <Route index element={<Navigate to="/trips" replace />} />
           <Route path="/trips" element={<TripsListPage />} />

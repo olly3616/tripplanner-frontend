@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -6,18 +7,22 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Field } from '@/components/ui/field'
-import { useLogin } from '@/features/auth/api'
+import { useLogin, useSignup } from '@/features/auth/api'
 import { isApiError } from '@/lib/api/client'
 
-const loginSchema = z.object({
+const schema = z.object({
   email: z.string().min(1, '이메일을 입력하세요.').email('올바른 이메일 형식이 아닙니다.'),
   password: z.string().min(1, '비밀번호를 입력하세요.'),
 })
 
-type LoginForm = z.infer<typeof loginSchema>
+type FormValues = z.infer<typeof schema>
+
+type Mode = 'login' | 'signup'
 
 export function LoginPage() {
+  const [mode, setMode] = useState<Mode>('login')
   const login = useLogin()
+  const signup = useSignup()
   const navigate = useNavigate()
   const location = useLocation()
   const from = (location.state as { from?: Location } | null)?.from?.pathname ?? '/trips'
@@ -26,19 +31,27 @@ export function LoginPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginForm>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
     defaultValues: { email: 'olly3616@pilsa.co.kr', password: '' },
   })
 
-  async function onSubmit(values: LoginForm) {
+  const isSignup = mode === 'signup'
+  const pending = login.isPending || signup.isPending
+
+  async function onSubmit(values: FormValues) {
     try {
-      await login.mutateAsync(values)
-      navigate(from, { replace: true })
+      if (isSignup) {
+        await signup.mutateAsync(values)
+        // 가입 직후 프로필 입력(온보딩)으로 이동
+        navigate('/onboarding', { replace: true })
+      } else {
+        await login.mutateAsync(values)
+        navigate(from, { replace: true })
+      }
     } catch (err) {
-      const message = isApiError(err)
-        ? (err.response?.data?.message ?? '로그인에 실패했습니다.')
-        : '로그인에 실패했습니다.'
+      const fallback = isSignup ? '가입에 실패했습니다.' : '로그인에 실패했습니다.'
+      const message = isApiError(err) ? (err.response?.data?.message ?? fallback) : fallback
       toast.error(message)
     }
   }
@@ -81,19 +94,30 @@ export function LoginPage() {
               <Input
                 id="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete={isSignup ? 'new-password' : 'current-password'}
                 invalid={!!errors.password}
                 {...register('password')}
               />
             </Field>
-            <Button type="submit" className="mt-1 w-full" disabled={login.isPending}>
-              {login.isPending ? '로그인 중…' : '로그인'}
+            <Button type="submit" className="mt-1 w-full" disabled={pending}>
+              {pending ? '처리 중…' : isSignup ? '가입하기' : '로그인'}
             </Button>
           </form>
+
+          <p className="mt-5 text-center text-sm text-secondary">
+            {isSignup ? '이미 계정이 있으신가요?' : '아직 계정이 없으신가요?'}{' '}
+            <button
+              type="button"
+              onClick={() => setMode(isSignup ? 'login' : 'signup')}
+              className="font-semibold text-accent-active hover:underline"
+            >
+              {isSignup ? '로그인' : '가입하기'}
+            </button>
+          </p>
         </div>
 
         <p className="mt-4 text-center text-xs text-muted">
-          목(Mock) 모드: 아무 비밀번호로 로그인할 수 있어요.
+          목(Mock) 모드: 아무 이메일·비밀번호로 진행할 수 있어요.
         </p>
       </div>
     </div>

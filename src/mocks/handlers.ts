@@ -41,11 +41,32 @@ export const handlers = [
     return HttpResponse.json({ user, accessToken: MOCK_TOKEN })
   }),
 
+  http.post(url('/auth/signup'), async ({ request }) => {
+    const body = (await request.json()) as { email?: string; password?: string }
+    // 목: 새 가입도 데모 사용자 계정으로 매핑하고, 프로필은 온보딩에서 채운다.
+    const user = currentUser()
+    if (body.email) user.email = body.email
+    return HttpResponse.json({ user, accessToken: MOCK_TOKEN, needsOnboarding: true })
+  }),
+
   http.post(url('/auth/logout'), () => new HttpResponse(null, { status: 204 })),
 
   http.get(url('/auth/me'), ({ request }) => {
     if (!isAuthed(request)) return unauthorized()
     return HttpResponse.json(currentUser())
+  }),
+
+  http.patch(url('/auth/me'), async ({ request }) => {
+    if (!isAuthed(request)) return unauthorized()
+    const body = (await request.json()) as Partial<{
+      name: string
+      defaultCurrency: string
+      timezone: string
+      avatarUrl: string
+    }>
+    const user = currentUser()
+    Object.assign(user, body)
+    return HttpResponse.json(user)
   }),
 
   // --- 여행 목록/생성 ---
